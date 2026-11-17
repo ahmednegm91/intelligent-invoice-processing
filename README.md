@@ -79,7 +79,7 @@ The model extracts the numbers **as printed**. Deterministic JavaScript logic pe
 ## Quick start
 
 1. Have a working n8n instance with **Form Trigger**, **Data Table**, **Execute Sub-workflow**, and **Google Gemini** nodes. The demonstration was built on self-hosted n8n.
-2. Import `workflows/ai-extraction-engine.json` **first**, then `workflows/main-workflow.json`.
+2. Import [ai-extraction-engine.json](workflows/ai-extraction-engine.json) **first**, then [main-workflow.json](workflows/main-workflow.json).
 3. Create a Gemini API credential in your own instance. Assign it to every AI node in the engine; credentials are intentionally absent from public exports.
 4. Create the `InvoiceRegistry` Data Table with the exact columns in [data-table-schema.md](docs/data-table-schema.md).
 5. In the main workflow, re-select the imported AI engine in `CallInvoiceAI`, and select your new Data Table in `CheckNewInvoice` and `SavePendingInvoice`.
@@ -165,4 +165,3 @@ Tell me your invoice intake channels, monthly volume, ERP/accounting software, a
 ---
 
 **Repository use:** No software license is included by default; select an appropriate license and publish intentionally before distributing software for third-party use. The examples are synthetic and do not establish guaranteed financial outcomes.
-

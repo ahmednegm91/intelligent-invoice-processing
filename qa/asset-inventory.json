@@ -14,8 +14,8 @@
     },
     {
       "path": "README.md",
-      "size_bytes": 12425,
-      "sha256": "249d68ead454cb7a6e5ba6ae7d97d9a5df66ba69bd24acc5a637f78e38de805f"
+      "size_bytes": 12753,
+      "sha256": "0fc1ca5ed6b0b6e87a32a3f20ffd3dcd512e3f27d0960d5b87c45828ad0e0895"
     },
     {
       "path": "README_AR.md",
@@ -134,8 +134,8 @@
     },
     {
       "path": "docs/technical-review.md",
-      "size_bytes": 6994,
-      "sha256": "1604ec37e7df85b02999c7866ee2ab3403d6e2940440e9e8ad9887bccdf316ee"
+      "size_bytes": 7218,
+      "sha256": "689d22bed6863428cc59e6ae6b11761fc2abd06f4ef01d84ccf6018a833cbf82"
     },
     {
       "path": "docs/test-cases.md",

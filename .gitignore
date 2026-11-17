@@ -1,0 +1,17 @@
+# Secrets and runtime state
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+**/private/
+**/customer-data/
+**/node_modules/
+**/__pycache__/
+.DS_Store
+Thumbs.db
+*.log

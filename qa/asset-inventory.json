@@ -1,0 +1,211 @@
+{
+  "generated_utc": "2026-11-17T10:28:21Z",
+  "notes": "Checksums for package files except this manifest itself",
+  "files": [
+    {
+      "path": ".env.example",
+      "size_bytes": 261,
+      "sha256": "95806e095ab7a5773e1c4046f684a627f25be0638089779ee716d1972000269d"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 197,
+      "sha256": "79c9f2e049399cc22fbc2646963bb37f16fe3248a20e1b1060d484d7c21e6aea"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 12425,
+      "sha256": "249d68ead454cb7a6e5ba6ae7d97d9a5df66ba69bd24acc5a637f78e38de805f"
+    },
+    {
+      "path": "README_AR.md",
+      "size_bytes": 11473,
+      "sha256": "c9242b707e948adef77355db36b0030c56a961cd24a5a96a59993de0767f66f3"
+    },
+    {
+      "path": "START_HERE.md",
+      "size_bytes": 2748,
+      "sha256": "23d733ca25d4dd54c291cd8cac718a5359be5835d8017d3c1cbbf325def09c6d"
+    },
+    {
+      "path": "demo/invoice-processing-visual-walkthrough.mp4",
+      "size_bytes": 1740511,
+      "sha256": "140cf98650411dc9b2fe7084e469cd50c4950ba997c6b28ad3f766cfc1738d1c"
+    },
+    {
+      "path": "demo/make_visual_walkthrough.py",
+      "size_bytes": 10383,
+      "sha256": "035e18744256ea6526463cd9f8196685de03306206ff2f6728095c8e782ab87c"
+    },
+    {
+      "path": "demo/storyboard/scene-01.png",
+      "size_bytes": 64665,
+      "sha256": "3780b5f511c24c508077359b46d1f871b4ad38d33be697bf3ea2209c58c94d4b"
+    },
+    {
+      "path": "demo/storyboard/scene-02.png",
+      "size_bytes": 178118,
+      "sha256": "7fd5108d0fd77e2ab19399fe2558499cd35fa9e3cb9b8b1a5ad284e7312ceaa2"
+    },
+    {
+      "path": "demo/storyboard/scene-03.png",
+      "size_bytes": 157071,
+      "sha256": "63b7631f6dee00178cdedd4200f6d56a8c71f3fe57bace0154d6282efd274c15"
+    },
+    {
+      "path": "demo/storyboard/scene-04.png",
+      "size_bytes": 112363,
+      "sha256": "8daeabf234118009d2ba4ed269d1450d7265cc614eb5a6ca7388a2003d3eefea"
+    },
+    {
+      "path": "demo/storyboard/scene-05.png",
+      "size_bytes": 74930,
+      "sha256": "5ca30a864b9101edccffe31deaf6412d6e50413e1d2f3b46f281c798b268f22d"
+    },
+    {
+      "path": "demo/storyboard/scene-06.png",
+      "size_bytes": 183128,
+      "sha256": "601cf14a685345dbdbf1c531bddb641573ead7f1edca50b18f1aa37b24e5498b"
+    },
+    {
+      "path": "demo/storyboard/scene-07.png",
+      "size_bytes": 172354,
+      "sha256": "cc26231105bc72eac619d104f7aebf48e93d6392390394277bfebf5fa5a2501f"
+    },
+    {
+      "path": "demo/storyboard/scene-08.png",
+      "size_bytes": 167798,
+      "sha256": "9ce59881de89bda38dd0fd634d6e071b405f436ddc161b6fd41bc3f664d21666"
+    },
+    {
+      "path": "demo/storyboard/scene-09.png",
+      "size_bytes": 74164,
+      "sha256": "778f18627978d130f1e63485874276b1af19ce60c003797418b41c675068c669"
+    },
+    {
+      "path": "demo/storyboard/scene-10.png",
+      "size_bytes": 64198,
+      "sha256": "27b7408ebb15f7e635c29069863530a9e937d2ba84e137ba35b5e612da68fd3a"
+    },
+    {
+      "path": "demo/thumbnail.png",
+      "size_bytes": 103573,
+      "sha256": "fc2a500bce459eb136eae9517efa4a5a33b0856252f4590e40661af493bfd64d"
+    },
+    {
+      "path": "docs/architecture.md",
+      "size_bytes": 3927,
+      "sha256": "677c2fe630950ba60dcef01ace6506613aa606ca77c2f2a82c485336f9f8250c"
+    },
+    {
+      "path": "docs/client-requirements.md",
+      "size_bytes": 2226,
+      "sha256": "fe280d325b7c855af31f4d9569932dc525688a2aec1272a38fcf29a5fe320f1e"
+    },
+    {
+      "path": "docs/customization-options-ar.md",
+      "size_bytes": 10691,
+      "sha256": "5ff0be278bdec21b30e12c6476073a1e2119d66893bccef4c239d490d818837c"
+    },
+    {
+      "path": "docs/customization-options.md",
+      "size_bytes": 11104,
+      "sha256": "43ef4951e3c96fee159d9ca77a62b4936539e92685e7877aebf6b9ea1a512f8f"
+    },
+    {
+      "path": "docs/data-table-schema.md",
+      "size_bytes": 2204,
+      "sha256": "44820b9bf4801048321695917ce7c6d7e27c15c3c6fee6694ec11f437e624e59"
+    },
+    {
+      "path": "docs/demo-guide.md",
+      "size_bytes": 2137,
+      "sha256": "0a2008e3d6873ccd3707cb135403b80423331858c0dcfa500872653bffe7a699"
+    },
+    {
+      "path": "docs/deployment-and-security.md",
+      "size_bytes": 3598,
+      "sha256": "47a991592e97f3c1775096d674811e3a950beea23e24c1f33e9ef0f649472598"
+    },
+    {
+      "path": "docs/installation.md",
+      "size_bytes": 5493,
+      "sha256": "e8f3b97d1aa2c1b06047f3e9b51e5b0fd7339fba32455f07ac34de3ea55f6436"
+    },
+    {
+      "path": "docs/technical-review.md",
+      "size_bytes": 6994,
+      "sha256": "1604ec37e7df85b02999c7866ee2ab3403d6e2940440e9e8ad9887bccdf316ee"
+    },
+    {
+      "path": "docs/test-cases.md",
+      "size_bytes": 3641,
+      "sha256": "b38bd102afb29730cbaf2631012404e266c9e4d9eac53cb928d9a26e5cab9753"
+    },
+    {
+      "path": "qa/QUALITY_REPORT.md",
+      "size_bytes": 3493,
+      "sha256": "70be9b12ac8a2da5a464fa183294493c694c39e49dc429026868c7359a2a9193"
+    },
+    {
+      "path": "qa/offline-tests.js",
+      "size_bytes": 13331,
+      "sha256": "f19f430ff5c96efe9bd41943cfaa4f997c61c599941bffe1f9f316b5725c6e6b"
+    },
+    {
+      "path": "samples/Invoice_01_English_Bilingual_Valid.pdf",
+      "size_bytes": 25754,
+      "sha256": "47e4f0dbb413e3f20c7e3004249bde529f4f65ffafb111b32e6e58e8b1d020cc"
+    },
+    {
+      "path": "samples/Invoice_02_Arabic_Bilingual_Valid.pdf",
+      "size_bytes": 31111,
+      "sha256": "21acbd29638d4689e902a33112b198617690dc83cfea53e5a8bb2a2669c834b7"
+    },
+    {
+      "path": "samples/Invoice_03_Mixed_Validation_Error.pdf",
+      "size_bytes": 29433,
+      "sha256": "f345277e07805df64958a36a2480995208cf60776fca69851aa5bbb5fa9d8953"
+    },
+    {
+      "path": "screenshots/APIProcessFailed.PNG",
+      "size_bytes": 66138,
+      "sha256": "537896416778d18567fc045ce0fdc3e4605e5823b68c10172221cebc10caa2fd"
+    },
+    {
+      "path": "screenshots/ai-engine.PNG",
+      "size_bytes": 52361,
+      "sha256": "374725309a9215ee29e16efdb38d043ee6a301019399953f900eceeab0e7b7b5"
+    },
+    {
+      "path": "screenshots/duplicate-detection.PNG",
+      "size_bytes": 68982,
+      "sha256": "a8a4661d656ae14f015fc16a46b3c98ed02e587bdf7b694f4bbc52f1de79bbc1"
+    },
+    {
+      "path": "screenshots/financial-error.PNG",
+      "size_bytes": 9712,
+      "sha256": "5552010ba9a2c70f6ee722afe3332c4020df7411ad7ef5dc644c02a14a777338"
+    },
+    {
+      "path": "screenshots/main-workflow.PNG",
+      "size_bytes": 69385,
+      "sha256": "0d00edfbaadecc6d5fd66c2e481b842a1d410291a74143d842b14562e9c50854"
+    },
+    {
+      "path": "screenshots/successful-processing.PNG",
+      "size_bytes": 71419,
+      "sha256": "32848cbecf3935eb87fe75aeb94d94c1e2d536f13b4b8d9fafd52b48795167da"
+    },
+    {
+      "path": "workflows/ai-extraction-engine.json",
+      "size_bytes": 14294,
+      "sha256": "f8bfee806961beae56bf6cb36a8de7a4f1a635477ba3a8b8fbfc16df4ca56016"
+    },
+    {
+      "path": "workflows/main-workflow.json",
+      "size_bytes": 23912,
+      "sha256": "77df880d2b7dd5886e073adcc7ffff071df0bbfafc79d26dfad56077bcfcf07a"
+    }
+  ]
+}

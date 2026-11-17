@@ -1,0 +1,788 @@
+{
+  "name": "P01 | Intelligent Invoice Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Invoice Processing Portal",
+        "formDescription": "Upload an invoice for automated processing and review.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Invoice",
+              "fieldType": "file",
+              "fieldName": "invoice_file",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        176
+      ],
+      "id": "08d901ff-aba6-4b85-8589-3bb2a614800e",
+      "name": "GetFile",
+      "webhookId": "1f687c90-db1a-4fb6-bf8f-6de247a0d42b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "e142a0fa-204c-46f9-9698-3cda3e908992",
+              "leftValue": "={{ ['application/pdf', 'image/jpeg', 'image/png'].includes($binary.invoice_file?.mimeType) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7eb882aa-2ba3-4fc9-a6ff-47ae85525625",
+              "leftValue": "={{ ({ pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' })[($binary.invoice_file?.fileName?.split('.').pop() || '').toLowerCase()] === $binary.invoice_file?.mimeType }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "03552e7f-03aa-43ec-aeb2-95fa558d4aea",
+              "leftValue": "={{ $binary.invoice_file?.bytes > 0 && $binary.invoice_file.bytes <= 10 * 1024 * 1024 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        224,
+        176
+      ],
+      "id": "1c759b15-3d2f-48d5-9f47-4e96394c4ab7",
+      "name": "ValidateFileType"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst invoice = $json;\nconst issues = [];\n\nconst readNumber = (value, label) => {\n  if (value === null || value === undefined || value === '') {\n    issues.push(`${label}: missing value`);\n    return null;\n  }\n\n  const number = Number(value);\n\n  if (!Number.isFinite(number)) {\n    issues.push(`${label}: invalid number`);\n    return null;\n  }\n\n  return number;\n};\n\nconst different = (a, b) => Math.abs(a - b) > 0.02;\n\nlet itemsSum = 0;\nlet allItemsValid = true;\n\nif (!Array.isArray(invoice.items) || invoice.items.length === 0) {\n  issues.push('Items missing');\n  allItemsValid = false;\n} else {\n  invoice.items.forEach((item, index) => {\n    const quantity = readNumber(item?.quantity, `Item ${index + 1} quantity`);\n    const price = readNumber(item?.unit_price, `Item ${index + 1} unit price`);\n    const lineTotal = readNumber(item?.line_total, `Item ${index + 1} line total`);\n\n    if ([quantity, price, lineTotal].includes(null)) {\n      allItemsValid = false;\n      return;\n    }\n\n    if (quantity <= 0 || price < 0 || lineTotal < 0) {\n      issues.push(`Item ${index + 1}: invalid negative or zero value`);\n    }\n\n    if (different(quantity * price, lineTotal)) {\n      issues.push(`Item ${index + 1} total mismatch`);\n    }\n\n    itemsSum += lineTotal;\n  });\n}\n\nconst subtotal = readNumber(invoice.subtotal, 'Subtotal');\nconst tax = readNumber(invoice.tax, 'Tax');\nconst total = readNumber(invoice.total, 'Total');\n\nif (allItemsValid && subtotal !== null && different(itemsSum, subtotal)) {\n  issues.push('Subtotal mismatch');\n}\n\nif (subtotal !== null && tax !== null && total !== null &&\n    different(subtotal + tax, total)) {\n  issues.push('Total mismatch');\n}\n\nreturn {\n  json: {\n    ...invoice,\n    validation: {\n      status: issues.length ? 'needs_review' : 'passed',\n      issues,\n      calculated_subtotal: allItemsValid ? Number(itemsSum.toFixed(2)) : null,\n      calculated_total: subtotal !== null && tax !== null\n        ? Number((subtotal + tax).toFixed(2)) : null\n    }\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "3e71e377-3064-4884-b3ae-4fbaac41aa98",
+      "name": "ValidateFinancials"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "09b6ed38-7217-4b4e-b809-9aac4d3b6714",
+              "leftValue": "={{ $json.validation.status }}",
+              "rightValue": "passed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1792,
+        -208
+      ],
+      "id": "33f6c037-349a-4809-a3d1-027d75f06d94",
+      "name": "CheckFinancialStatus"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst invoice = $json;\n\nconst supplier = String(invoice.supplier_name ?? '')\n  .trim()\n  .toLowerCase()\n  .replace(/\\s+/g, ' ');\n\nconst invoiceNumber = String(invoice.invoice_number ?? '')\n  .trim()\n  .toUpperCase()\n  .replace(/\\s+/g, '');\n\nconst invoiceKey = supplier && invoiceNumber\n  ? `${supplier}|${invoiceNumber}`\n  : null;\n\nreturn {\n  json: {\n    ...invoice,\n    invoice_key: invoiceKey\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "6c7af27f-e221-4fdc-aba9-c06507e0d1c5",
+      "name": "CreateInvoiceKey"
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "invoice_key",
+              "keyValue": "={{ $json.invoice_key }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        -112
+      ],
+      "id": "e4da45e7-19d8-4554-be0c-02fc0c2106d8",
+      "name": "CheckNewInvoice",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "supplier_name": "={{ $json.supplier_name }}",
+            "invoice_number": "={{ $json.invoice_number }}",
+            "invoice_key": "={{ $json.invoice_key }}",
+            "invoice_date": "={{ $json.invoice_date }}",
+            "currency": "={{ $json.currency }}",
+            "total": "={{ $json.total }}",
+            "validation_status": "={{ $json.validation.status }}",
+            "approval_status": "pending_review",
+            "validation_issues": "={{ JSON.stringify($json.validation.issues ?? []) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice_key",
+              "displayName": "invoice_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "supplier_name",
+              "displayName": "supplier_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_date",
+              "displayName": "invoice_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validation_status",
+              "displayName": "validation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "approval_status",
+              "displayName": "approval_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validation_issues",
+              "displayName": "validation_issues",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reviewer_notes",
+              "displayName": "reviewer_notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2016,
+        -208
+      ],
+      "id": "117cc579-dd17-4d11-b0ef-1cc07bbfd1ed",
+      "name": "SavePendingInvoice"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "32b806b5-fc88-4853-ac70-a5737d39472f",
+              "leftValue": "={{ $json.invoice_key ?? '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "33732482-0e96-47be-8f45-74730c86161c",
+      "name": "HasInvoiceKey"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c6a8f25-44cd-4589-a4c7-8fc2a4670025",
+              "name": "approval_status",
+              "value": "needs_review",
+              "type": "string"
+            },
+            {
+              "id": "4469df26-5d8e-4638-b240-7f73cf53ee96",
+              "name": "review_reason",
+              "value": "missing_invoice_identity",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1344,
+        80
+      ],
+      "id": "e7859d57-a6e8-4106-8702-f17b7781a88f",
+      "name": "MissingInvoiceData"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "4366f4a8-3f5b-4f29-985c-b242518533a4",
+              "leftValue": "={{ $json.invoice_key ?? '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1568,
+        -112
+      ],
+      "id": "d031d53e-3e43-46a5-ae9f-7f370c6b98a2",
+      "name": "IsNewInvoice"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst invoice = $('CreateInvoiceKey').first().json;\n\nreturn {\n  json: {\n    ...invoice,\n    approval_status: 'needs_review',\n    review_reason: 'duplicate_invoice'\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -16
+      ],
+      "id": "b0c055e6-0b12-436f-988b-38aa92504b12",
+      "name": "FlagDuplicateInvoice"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst file = $input.item.binary?.invoice_file;\n\nconst allowedTypes = {\n  pdf: 'application/pdf',\n  jpg: 'image/jpeg',\n  jpeg: 'image/jpeg',\n  png: 'image/png'\n};\n\nconst maxSize = 10 * 1024 * 1024;\n\nconst fileName = file?.fileName ?? '';\nconst extension = fileName.split('.').pop().toLowerCase();\nconst mimeType = file?.mimeType ?? '';\nconst size = Number(file?.bytes);\n\nlet errorCode;\nlet message;\n\nif (!file) {\n  errorCode = 'FILE_MISSING';\n  message = 'No file was uploaded.';\n} else if (allowedTypes[extension] !== mimeType) {\n  errorCode = 'UNSUPPORTED_FORMAT';\n  message = 'Only PDF, JPG, JPEG and PNG files are supported.';\n} else if (!Number.isFinite(size) || size <= 0) {\n  errorCode = 'INVALID_FILE_SIZE';\n  message = 'File size is missing or invalid.';\n} else if (size > maxSize) {\n  errorCode = 'FILE_TOO_LARGE';\n  message = 'The maximum allowed file size is 10 MB.';\n} else {\n  errorCode = 'INVALID_FILE';\n  message = 'The file failed validation.';\n}\n\nreturn {\n  json: {\n    status: 'rejected',\n    error_code: errorCode,\n    error_message: message,\n    file_name: fileName,\n    size_bytes: Number.isFinite(size) ? size : null\n  }\n};\n",
+        "mode": "runOnceForEachItem"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        368
+      ],
+      "id": "a3e48d4a-f24f-435c-bf66-0c9af81b2ad2",
+      "name": "HandleInvalidFile"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Upload Rejected",
+        "completionMessage": "={{ $json.error_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        672,
+        368
+      ],
+      "id": "4a9b8b12-e5a8-418a-8a9a-66049133458f",
+      "name": "ShowUploadError",
+      "webhookId": "b16ce3c9-2fb8-4dfc-a8fa-1942f08b0aa8"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "462caeb1-7ef8-40dc-8993-dc1921e0668f",
+              "name": "status",
+              "value": "failed",
+              "type": "string"
+            },
+            {
+              "id": "4a2ffcc2-e10e-420a-be56-2049db1251ae",
+              "name": "error_code",
+              "value": "AI_PROCESSING_FAILED",
+              "type": "string"
+            },
+            {
+              "id": "dab54916-0f16-47fb-a7b1-e4859bc4062f",
+              "name": "error_message",
+              "value": "Unable to process this invoice. Please try again later.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        176
+      ],
+      "id": "31c36906-d634-4c4b-aa3c-1e2f97361ed7",
+      "name": "AIProcessingFailed"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "AI Processing Failed",
+        "completionMessage": "={{ $json.error_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        896,
+        176
+      ],
+      "id": "1a8467f2-d896-4ba8-a971-0c62a42ce694",
+      "name": "ShowAIError",
+      "webhookId": "a34fd752-37ef-4a4f-b1ab-b8f22fdc7157"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Invoice Received",
+        "completionMessage": "={{ 'Invoice: ' + $json.invoice_number + '\\nFinancial Validation: ' + $json.validation_status + '\\nApproval Status: ' + $json.approval_status }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2240,
+        -208
+      ],
+      "id": "498c8aa7-3e28-47a2-8a6a-db6207ed3caf",
+      "name": "ShowInvoiceResult",
+      "webhookId": "d63ea844-58ee-4b3b-ae7a-bfd71f90bd61"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Duplicate Invoice",
+        "completionMessage": "This invoice is already registered. No new record was created.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2016,
+        -16
+      ],
+      "id": "89176e44-06f0-4778-a5c3-bba6f478c82a",
+      "name": "ShowDuplicateResult",
+      "webhookId": "1ec1778d-25e6-4f8d-a5cc-44aa5f5c743e"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Invoice Needs Review",
+        "completionMessage": "Supplier name or invoice number could not be identified. Please review the document and try again.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1568,
+        80
+      ],
+      "id": "6b17bef0-763e-4e71-9b99-dacc03eb53ab",
+      "name": "ShowMissingDataResult",
+      "webhookId": "c86e5c80-29b5-4048-8a33-eed15ac18a45"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        80
+      ],
+      "id": "a67d9ecd-709c-4f21-860e-2dfb42c9df99",
+      "name": "CallInvoiceAI",
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GetFile": {
+      "main": [
+        [
+          {
+            "node": "ValidateFileType",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ValidateFileType": {
+      "main": [
+        [
+          {
+            "node": "CallInvoiceAI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HandleInvalidFile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ValidateFinancials": {
+      "main": [
+        [
+          {
+            "node": "CreateInvoiceKey",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateInvoiceKey": {
+      "main": [
+        [
+          {
+            "node": "HasInvoiceKey",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckNewInvoice": {
+      "main": [
+        [
+          {
+            "node": "IsNewInvoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SavePendingInvoice": {
+      "main": [
+        [
+          {
+            "node": "ShowInvoiceResult",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HasInvoiceKey": {
+      "main": [
+        [
+          {
+            "node": "CheckNewInvoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MissingInvoiceData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckFinancialStatus": {
+      "main": [
+        [
+          {
+            "node": "SavePendingInvoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SavePendingInvoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsNewInvoice": {
+      "main": [
+        [
+          {
+            "node": "CheckFinancialStatus",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FlagDuplicateInvoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HandleInvalidFile": {
+      "main": [
+        [
+          {
+            "node": "ShowUploadError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AIProcessingFailed": {
+      "main": [
+        [
+          {
+            "node": "ShowAIError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FlagDuplicateInvoice": {
+      "main": [
+        [
+          {
+            "node": "ShowDuplicateResult",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MissingInvoiceData": {
+      "main": [
+        [
+          {
+            "node": "ShowMissingDataResult",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CallInvoiceAI": {
+      "main": [
+        [
+          {
+            "node": "ValidateFinancials",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AIProcessingFailed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
